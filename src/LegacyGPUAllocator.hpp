@@ -158,8 +158,15 @@ namespace vuk {
 		    BufferUsageFlagBits::eTransferRead | BufferUsageFlagBits::eTransferWrite | BufferUsageFlagBits::eUniformTexelBuffer |
 		    BufferUsageFlagBits::eStorageTexelBuffer | BufferUsageFlagBits::eUniformBuffer | BufferUsageFlagBits::eStorageBuffer |
 		    BufferUsageFlagBits::eIndexBuffer | BufferUsageFlagBits::eVertexBuffer | BufferUsageFlagBits::eIndirectBuffer |
-		    BufferUsageFlagBits::eShaderDeviceAddress | BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR |
-		    BufferUsageFlagBits::eAccelerationStructureStorageKHR | BufferUsageFlagBits::eShaderBindingTable;
+		    BufferUsageFlagBits::eShaderDeviceAddress
+#if VK_KHR_acceleration_structure
+			| BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR |
+		    BufferUsageFlagBits::eAccelerationStructureStorageKHR
+#endif
+#if VK_KHR_ray_tracing_pipeline
+			| BufferUsageFlagBits::eShaderBindingTable
+#endif
+			;
 
 		static constexpr size_t large_allocation_size = 256 * 1024 * 1024;
 

@@ -159,6 +159,7 @@ namespace vuk {
 		using type = vuk::ComputePipelineInstanceCreateInfo;
 	};
 
+#if VK_KHR_ray_tracing_pipeline
 	struct RayTracingPipelineInstanceCreateInfo {
 		PipelineBaseInfo* base;
 
@@ -185,6 +186,7 @@ namespace vuk {
 	struct create_info<RayTracingPipelineInfo> {
 		using type = vuk::RayTracingPipelineInstanceCreateInfo;
 	};
+#endif
 } // namespace vuk
 
 namespace std {
@@ -203,10 +205,12 @@ namespace std {
 		size_t operator()(vuk::ComputePipelineInstanceCreateInfo const& x) const noexcept;
 	};
 
+#if VK_KHR_ray_tracing_pipeline
 	template<>
 	struct hash<vuk::RayTracingPipelineInstanceCreateInfo> {
 		size_t operator()(vuk::RayTracingPipelineInstanceCreateInfo const& x) const noexcept;
 	};
+#endif
 
 	template<>
 	struct hash<VkPushConstantRange> {

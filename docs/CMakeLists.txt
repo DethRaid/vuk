@@ -10,7 +10,7 @@ set(DOXYGEN_INDEX_FILE ${CMAKE_CURRENT_SOURCE_DIR}/html/index.html)
 set(DOXYGEN_INPUT_DIR ${PROJECT_SOURCE_DIR}/include/vuk\ ${PROJECT_SOURCE_DIR}/include/vuk/resources)
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/index.html)
-set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+set(DOXYFILE_IN Doxyfile.in)
 set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
 #Replace variables inside @@ with the current values
@@ -27,7 +27,7 @@ add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
 
 find_package(Sphinx REQUIRED)
 
-set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+set(SPHINX_SOURCE .)
 set(SPHINX_BUILD ${CMAKE_CURRENT_BINARY_DIR}/sphinx)
 set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 
@@ -44,11 +44,11 @@ add_custom_command(OUTPUT ${SPHINX_INDEX_FILE}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                    DEPENDS
                    # Other docs files you want to track should go here (or in some variable)
-                   ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
-				   ${CMAKE_CURRENT_SOURCE_DIR}/topics/context.rst
-				   ${CMAKE_CURRENT_SOURCE_DIR}/topics/allocators.rst
-				   ${CMAKE_CURRENT_SOURCE_DIR}/topics/rendergraph.rst
-				   ${CMAKE_CURRENT_SOURCE_DIR}/topics/commandbuffer.rst
+        index.rst
+        topics/context.rst
+        topics/allocators.rst
+        topics/rendergraph.rst
+        topics/commandbuffer.rst
                    ${DOXYGEN_INDEX_FILE}
                    MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
                    COMMENT "Generating documentation with Sphinx")
