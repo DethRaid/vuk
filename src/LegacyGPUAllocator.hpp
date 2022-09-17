@@ -15,6 +15,7 @@
 #include <string.h>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 #include <vk_mem_alloc.h>
 
 namespace vuk {
@@ -158,15 +159,8 @@ namespace vuk {
 		    BufferUsageFlagBits::eTransferRead | BufferUsageFlagBits::eTransferWrite | BufferUsageFlagBits::eUniformTexelBuffer |
 		    BufferUsageFlagBits::eStorageTexelBuffer | BufferUsageFlagBits::eUniformBuffer | BufferUsageFlagBits::eStorageBuffer |
 		    BufferUsageFlagBits::eIndexBuffer | BufferUsageFlagBits::eVertexBuffer | BufferUsageFlagBits::eIndirectBuffer |
-		    BufferUsageFlagBits::eShaderDeviceAddress
-#if VK_KHR_acceleration_structure
-			| BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR |
-		    BufferUsageFlagBits::eAccelerationStructureStorageKHR
-#endif
-#if VK_KHR_ray_tracing_pipeline
-			| BufferUsageFlagBits::eShaderBindingTable
-#endif
-			;
+		    BufferUsageFlagBits::eShaderDeviceAddress | BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR |
+			BufferUsageFlagBits::eAccelerationStructureStorageKHR | BufferUsageFlagBits::eShaderBindingTable;
 
 		static constexpr size_t large_allocation_size = 256 * 1024 * 1024;
 

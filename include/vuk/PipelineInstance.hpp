@@ -37,9 +37,9 @@ namespace vuk {
 			uint32_t line_width_not_1 : 1;
 			uint32_t more_than_one_sample : 1;
 		} records = {};
-		uint32_t attachmentCount : std::bit_width(VUK_MAX_COLOR_ATTACHMENTS); // up to VUK_MAX_COLOR_ATTACHMENTS attachments
+		uint32_t attachmentCount : 4; // up to VUK_MAX_COLOR_ATTACHMENTS attachments
 		// input assembly state
-		uint32_t topology : std::bit_width(10u);
+		uint32_t topology : 4;
 		uint32_t primitive_restart_enable : 1;
 		VkCullModeFlags cullMode : 2;
 		union {
@@ -62,18 +62,18 @@ namespace vuk {
 
 		struct PipelineColorBlendAttachmentState {
 			Bool32 blendEnable : 1;
-			BlendFactor srcColorBlendFactor : std::bit_width(18u);
-			BlendFactor dstColorBlendFactor : std::bit_width(18u);
-			BlendOp colorBlendOp : std::bit_width(5u); // not supporting blend op zoo yet
-			BlendFactor srcAlphaBlendFactor : std::bit_width(18u);
-			BlendFactor dstAlphaBlendFactor : std::bit_width(18u);
-			BlendOp alphaBlendOp : std::bit_width(5u); // not supporting blend op zoo yet
+			BlendFactor srcColorBlendFactor : 5;
+			BlendFactor dstColorBlendFactor : 5;
+			BlendOp colorBlendOp : 3; // not supporting blend op zoo yet
+			BlendFactor srcAlphaBlendFactor : 5;
+			BlendFactor dstAlphaBlendFactor : 5;
+			BlendOp alphaBlendOp : 3; // not supporting blend op zoo yet
 			uint32_t colorWriteMask : 4;
 		};
 
 		// blend state
 		struct BlendStateLogicOp {
-			uint32_t logic_op : std::bit_width(16u);
+			uint32_t logic_op : 5;
 		};
 
 		struct RasterizationState {
@@ -92,7 +92,7 @@ namespace vuk {
 		struct Depth {
 			uint8_t depthTestEnable : 1;
 			uint8_t depthWriteEnable : 1;
-			uint8_t depthCompareOp : std::bit_width(7u);
+			uint8_t depthCompareOp : 3;
 		};
 		struct DepthBounds {
 			float minDepthBounds;
@@ -159,7 +159,6 @@ namespace vuk {
 		using type = vuk::ComputePipelineInstanceCreateInfo;
 	};
 
-#if VK_KHR_ray_tracing_pipeline
 	struct RayTracingPipelineInstanceCreateInfo {
 		PipelineBaseInfo* base;
 
@@ -186,7 +185,6 @@ namespace vuk {
 	struct create_info<RayTracingPipelineInfo> {
 		using type = vuk::RayTracingPipelineInstanceCreateInfo;
 	};
-#endif
 } // namespace vuk
 
 namespace std {
@@ -205,12 +203,10 @@ namespace std {
 		size_t operator()(vuk::ComputePipelineInstanceCreateInfo const& x) const noexcept;
 	};
 
-#if VK_KHR_ray_tracing_pipeline
 	template<>
 	struct hash<vuk::RayTracingPipelineInstanceCreateInfo> {
 		size_t operator()(vuk::RayTracingPipelineInstanceCreateInfo const& x) const noexcept;
 	};
-#endif
 
 	template<>
 	struct hash<VkPushConstantRange> {

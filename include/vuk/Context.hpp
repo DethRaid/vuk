@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <mutex>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -11,11 +12,6 @@
 #include "vuk/Image.hpp"
 #include "vuk/Swapchain.hpp"
 #include "vuk_fwd.hpp"
-
-namespace std {
-	class mutex;
-	class recursive_mutex;
-} // namespace std
 
 namespace vuk {
 	/// @brief Parameters used for creating a Context

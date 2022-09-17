@@ -5,7 +5,10 @@
 #include "vuk/Result.hpp"
 #include "vuk/vuk_fwd.hpp"
 
+#ifdef __cpp_lib_source_location
 #include <source_location>
+#endif
+
 #include <span>
 
 namespace vuk {

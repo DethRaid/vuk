@@ -37,6 +37,7 @@ namespace vuk {
 	    compute_queue_family_index(params.compute_queue_family_index),
 	    transfer_queue_family_index(params.transfer_queue_family_index),
 	    debug(*this) {
+		
 		auto queueSubmit2KHR = (PFN_vkQueueSubmit2KHR)vkGetDeviceProcAddr(device, "vkQueueSubmit2KHR");
 		assert(queueSubmit2KHR != nullptr);
 

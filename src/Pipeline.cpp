@@ -192,13 +192,11 @@ namespace std {
 		return h;
 	}
 
-#if VK_KHR_ray_tracing_pipeline
 	size_t hash<vuk::RayTracingPipelineInstanceCreateInfo>::operator()(vuk::RayTracingPipelineInstanceCreateInfo const& x) const noexcept {
 		size_t h = 0;
 		hash_combine(h, x.base, robin_hood::hash_bytes(x.specialization_constant_data.data(), x.specialization_info.dataSize), x.specialization_map_entries);
 		return h;
 	}
-#endif
 
 	size_t hash<VkPushConstantRange>::operator()(VkPushConstantRange const& x) const noexcept {
 		size_t h = 0;

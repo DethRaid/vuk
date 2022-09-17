@@ -718,9 +718,9 @@ namespace vuk {
 		auto graphics_begin = compute_end;
 		auto graphics_end =
 		    std::stable_partition(compute_end, impl->ordered_passes.end(), [](const PassInfo* p) { return p->domain & DomainFlagBits::eGraphicsQueue; });
-		std::span transfer_passes = { transfer_begin, transfer_end };
-		std::span compute_passes = { compute_begin, compute_end };
-		std::span graphics_passes = { graphics_begin, graphics_end };
+		std::span transfer_passes = { &*transfer_begin, &*transfer_end };
+		std::span compute_passes = { &*compute_begin, &*compute_end };
+		std::span graphics_passes = { &*graphics_begin, &*graphics_end };
 		impl->ordered_passes.erase(graphics_end, impl->ordered_passes.end());
 
 		// graphics: assemble renderpasses based on framebuffers

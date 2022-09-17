@@ -186,9 +186,7 @@ namespace vuk {
 		PipelineBaseInfo* next_ray_tracing_pipeline = nullptr;
 		std::optional<PipelineInfo> current_pipeline;
 		std::optional<ComputePipelineInfo> current_compute_pipeline;
-#if VK_KHR_ray_tracing_pipeline
 		std::optional<RayTracingPipelineInfo> current_ray_tracing_pipeline;
-#endif
 
 		// Input assembly & fixed-function attributes
 		PrimitiveTopology topology = PrimitiveTopology::eTriangleList;
@@ -534,12 +532,10 @@ namespace vuk {
 		/// @param depth depth of the ray trace query dimensions
 		CommandBuffer& trace_rays(size_t width, size_t height, size_t depth);
 
-#if VK_KHR_acceleration_structure
 		/// @brief Build acceleration structures
 		CommandBuffer& build_acceleration_structures(uint32_t info_count,
 		                                             const VkAccelerationStructureBuildGeometryInfoKHR* pInfos,
 		                                             const VkAccelerationStructureBuildRangeInfoKHR* const* ppBuildRangeInfos);
-#endif
 
 		// commands for renderpass-less command buffers
 
