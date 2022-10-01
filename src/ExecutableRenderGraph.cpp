@@ -810,12 +810,13 @@ namespace vuk {
 
 		auto record_batch = [&alloc, this](std::span<RenderPassInfo> rpis, DomainFlagBits domain) {
 			SubmitBatch sbatch{ .domain = domain };
-			auto partition_it = rpis.begin();
-			while (partition_it != rpis.end()) {
+			auto partition_it = rpis.data();
+			auto end_ptr = rpis.data() + rpis.size();
+			while (partition_it != end_ptr) {
 				auto batch_index = partition_it->batch_index;
 				auto new_partition_it =
-				    std::partition_point(partition_it, rpis.end(), [batch_index](const RenderPassInfo& rpi) { return rpi.batch_index == batch_index; });
-				auto partition_span = std::span(&*partition_it, &*new_partition_it);
+				    std::partition_point(partition_it, end_ptr, [batch_index](const RenderPassInfo& rpi) { return rpi.batch_index == batch_index; });
+				auto partition_span = std::span(partition_it, new_partition_it);
 				auto si = record_single_submit(alloc, partition_span, domain);
 				sbatch.submits.emplace_back(*si); // TODO: error handling
 				partition_it = new_partition_it;
@@ -826,17 +827,18 @@ namespace vuk {
 		// record cbufs
 		// assume that rpis are partitioned wrt batch_index
 
-		auto graphics_rpis = std::span(&*impl->rpis.begin(), &*impl->rpis.begin() + impl->num_graphics_rpis);
+        auto* impl_rpis_begin = impl->rpis.data();
+		auto graphics_rpis = std::span(impl_rpis_begin, impl_rpis_begin + impl->num_graphics_rpis);
 		if (graphics_rpis.size() > 0) {
 			sbundle.batches.emplace_back(record_batch(graphics_rpis, DomainFlagBits::eGraphicsQueue));
 		}
 
-		auto compute_rpis = std::span(&*impl->rpis.begin() + impl->num_graphics_rpis, &*impl->rpis.begin() + impl->num_graphics_rpis + impl->num_compute_rpis);
+		auto compute_rpis = std::span(impl_rpis_begin + impl->num_graphics_rpis, impl_rpis_begin + impl->num_graphics_rpis + impl->num_compute_rpis);
 		if (compute_rpis.size() > 0) {
 			sbundle.batches.emplace_back(record_batch(compute_rpis, DomainFlagBits::eComputeQueue));
 		}
 
-		auto transfer_rpis = std::span(&*impl->rpis.begin() + impl->num_graphics_rpis + impl->num_compute_rpis, &*impl->rpis.end());
+		auto transfer_rpis = std::span(impl_rpis_begin + impl->num_graphics_rpis + impl->num_compute_rpis, impl_rpis_begin + impl->rpis.size());
 		if (transfer_rpis.size() > 0) {
 			sbundle.batches.emplace_back(record_batch(transfer_rpis, DomainFlagBits::eTransferQueue));
 		}

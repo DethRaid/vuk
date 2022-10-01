@@ -709,19 +709,21 @@ namespace vuk {
 
 		// partition passes into different queues
 		// TODO: queue inference
-		auto transfer_begin = impl->ordered_passes.begin();
+		auto transfer_begin = impl->ordered_passes.data();
+		auto impl_ordered_passes_end = impl->ordered_passes.data() + impl->ordered_passes.size();
 		auto transfer_end = std::stable_partition(
-		    impl->ordered_passes.begin(), impl->ordered_passes.end(), [](const PassInfo* p) { return p->domain & DomainFlagBits::eTransferQueue; });
+				impl->ordered_passes.data(), impl_ordered_passes_end, [](const PassInfo* p) { return p->domain & DomainFlagBits::eTransferQueue; });
 		auto compute_begin = transfer_end;
 		auto compute_end =
-		    std::stable_partition(transfer_end, impl->ordered_passes.end(), [](const PassInfo* p) { return p->domain & DomainFlagBits::eComputeQueue; });
+		    std::stable_partition(transfer_end, impl_ordered_passes_end, [](const PassInfo* p) { return p->domain & DomainFlagBits::eComputeQueue; });
 		auto graphics_begin = compute_end;
 		auto graphics_end =
-		    std::stable_partition(compute_end, impl->ordered_passes.end(), [](const PassInfo* p) { return p->domain & DomainFlagBits::eGraphicsQueue; });
-		std::span transfer_passes = { &*transfer_begin, &*transfer_end };
-		std::span compute_passes = { &*compute_begin, &*compute_end };
-		std::span graphics_passes = { &*graphics_begin, &*graphics_end };
-		impl->ordered_passes.erase(graphics_end, impl->ordered_passes.end());
+		    std::stable_partition(compute_end, impl_ordered_passes_end, [](const PassInfo* p) { return p->domain & DomainFlagBits::eGraphicsQueue; });
+		std::span transfer_passes = { transfer_begin, transfer_end };
+		std::span compute_passes = { compute_begin, compute_end };
+		std::span graphics_passes = { graphics_begin, graphics_end };
+		const auto graphics_end_offset = graphics_end - transfer_begin;
+		impl->ordered_passes.erase(impl->ordered_passes.begin() + graphics_end_offset, impl->ordered_passes.end());
 
 		// graphics: assemble renderpasses based on framebuffers
 		// we need to collect passes into framebuffers, which will determine the renderpasses
