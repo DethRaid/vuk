@@ -17,9 +17,8 @@ void vuk::ExampleRunner::render() {
 	global->allocate_semaphores(*present_ready);
 	global->allocate_semaphores(*render_complete);
 
-	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
-		ImGui_ImplGlfw_NewFrame();
+	while (!should_close) {
+		poll_events();
 		ImGui::NewFrame();
 
 		ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 352.f, 2));

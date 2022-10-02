@@ -5,8 +5,8 @@ void vuk::ExampleRunner::render() {
 	vuk::wait_for_futures_explicit(*global, compiler, futures);
 	futures.clear();
 
-	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
+	while (!should_close ) {
+		poll_events();
 		auto& xdev_frame_resource = xdev_rf_alloc->get_next_frame();
 		context->next_frame();
 		Allocator frame_allocator(xdev_frame_resource);
