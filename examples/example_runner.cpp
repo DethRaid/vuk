@@ -15,9 +15,13 @@ namespace vuk {
 		// Setup Platform/Renderer bindings
 		imgui_data = util::ImGui_ImplVuk_Init(*global);
 		{
-			std::vector<std::jthread> threads;
+			std::vector<std::thread> threads;
 			for (auto& ex : examples) {
-				threads.emplace_back(std::jthread([&] { ex->setup(*this, *global); }));
+				threads.emplace_back(std::thread([&] { ex->setup(*this, *global); }));
+			}
+
+			for (auto& thread : threads) {
+				thread.join();
 			}
 		}
 

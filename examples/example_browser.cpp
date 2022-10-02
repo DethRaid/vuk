@@ -4,7 +4,7 @@
 std::vector<vuk::Name> chosen_resource;
 
 bool render_all = true;
-std::jthread presentation_thread;
+std::thread presentation_thread;
 vuk::SingleSwapchainRenderBundle bundle;
 
 void vuk::ExampleRunner::render() {
@@ -66,7 +66,7 @@ void vuk::ExampleRunner::render() {
 				presentation_thread.join();
 			}
 			auto result = *execute_submit(frame_allocator, std::move(erg), std::move(bundle));
-			presentation_thread = std::jthread([=, this]() mutable {
+			presentation_thread = std::thread([=, this]() mutable {
 				present_to_one(*context, std::move(result));
 				bundle = *acquire_one(*context, swapchain, (*present_ready)[context->get_frame_count() % 3], (*render_complete)[context->get_frame_count() % 3]);
 			});
@@ -180,7 +180,7 @@ void vuk::ExampleRunner::render() {
 				presentation_thread.join();
 			}
 			auto result = *execute_submit(frame_allocator, std::move(erg), std::move(bundle));
-			presentation_thread = std::jthread([=, this]() mutable {
+			presentation_thread = std::thread([=, this]() mutable {
 				present_to_one(*context, std::move(result));
 				bundle = *acquire_one(*context, swapchain, (*present_ready)[context->get_frame_count() % 3], (*render_complete)[context->get_frame_count() % 3]);
 			});
