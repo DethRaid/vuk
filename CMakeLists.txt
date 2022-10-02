@@ -32,13 +32,14 @@ option(VUK_BUILD_TESTS "Build tests" OFF)
 if(VUK_USE_VULKAN_SDK)
 	find_package(Vulkan REQUIRED)
 	if(VUK_USE_SHADERC)
-		add_library(shaderc UNKNOWN IMPORTED)
 		if(WIN32)
 			# use the version in the SDK
+			add_library(shaderc UNKNOWN IMPORTED)
 			set_target_properties(shaderc PROPERTIES IMPORTED_LOCATION $ENV{VULKAN_SDK}/Lib/shaderc_shared.lib)
 			set_property(TARGET shaderc PROPERTY INTERFACE_INCLUDE_DIRECTORIES $ENV{VULKAN_SDK}/Include)
 			target_link_libraries(vuk PRIVATE shaderc)
 		else()
+			add_library(shaderc UNKNOWN IMPORTED)
 			target_link_directories(vuk PUBLIC $ENV{VULKAN_SDK}/lib)
 			target_link_libraries(vuk PRIVATE shaderc_combined glslang MachineIndependent OSDependent OGLCompiler GenericCodeGen SPIRV SPIRV-Tools-opt SPIRV-Tools)
 		endif()
@@ -55,7 +56,22 @@ if(VUK_USE_VULKAN_SDK)
 	endif()
 else()
 	if (VUK_USE_SHADERC)
-		target_link_libraries(vuk PRIVATE shaderc_combined glslang MachineIndependent OSDependent OGLCompiler GenericCodeGen SPIRV SPIRV-Tools-opt SPIRV-Tools)
+		if(ANDROID)
+			# requirement: prebuild shaderc with:
+			#  cd  ${CMAKE_CURRENT_SOURCE_DIR} && mkdir -p shaderc && cd shaderc
+			#  ${ANDROID_NDK}/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=${ANDROID_NDK}/sources/third_party/shaderc/Android.mk APP_STL:=all APP_ABI:=all APP_PLATFORM:=android-26 libshaderc_combined
+			add_library(shaderc STATIC IMPORTED)
+			target_include_directories(shaderc INTERFACE
+					${CMAKE_CURRENT_SOURCE_DIR}/ext/shaderc/include)
+			set_target_properties(shaderc PROPERTIES IMPORTED_LOCATION
+					${CMAKE_CURRENT_SOURCE_DIR}/ext/shaderc/libs/${ANDROID_STL}/${ANDROID_ABI}/libshaderc.a)
+			message(STATUS "Added shaderc target")
+
+			target_link_libraries(vuk PRIVATE shaderc)
+
+		else()
+			target_link_libraries(vuk PRIVATE shaderc_combined glslang MachineIndependent OSDependent OGLCompiler GenericCodeGen SPIRV SPIRV-Tools-opt SPIRV-Tools)
+		endif()
 	endif()
 	if (VUK_USE_DXC)
 		target_link_libraries(vuk PRIVATE dxcompiler)

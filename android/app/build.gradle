@@ -35,7 +35,9 @@ android {
         externalNativeBuild {
             cmake {
                 abiFilters 'arm64-v8a', 'x86_64'
-                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=c++_static', '-DVUK_USE_SHADERC=ON', '-DVUK_BUILD_EXAMPLES=ON'
+                arguments '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=c++_static',
+                        '-DVUK_USE_SHADERC=ON', '-DVUK_BUILD_EXAMPLES=ON',
+                        '-DVUK_USE_VULKAN_SDK=OFF', '-DVUK_USE_DXC=OFF', '-DVUK_LINK_TO_LOADER=OFF'
             }
         }
     }
