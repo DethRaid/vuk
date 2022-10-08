@@ -1,6 +1,7 @@
 #include "example_runner.hpp"
 
 #ifdef __ANDROID__
+#include "example_runner_android.hpp"
 #else
 #include "example_runner_glfw.hpp"
 #endif
@@ -51,6 +52,7 @@ namespace vuk {
 
 	ExampleRunner& ExampleRunner::get_runner() {
 #ifdef __ANDROID__
+		static std::unique_ptr<ExampleRunner> runner = std::make_unique<ExampleRunnerAndroid>();
 #else
 		static std::unique_ptr<ExampleRunner> runner = std::make_unique<ExampleRunnerGlfw>();
 #endif

@@ -24,6 +24,16 @@ if(NOT ANDROID)
     FetchContent_MakeAvailable(glfw)
 endif()
 
+ # VOLK party    
+ FetchContent_Declare(
+         fetch_volk
+         GIT_REPOSITORY  https://github.com/zeux/volk.git
+         GIT_TAG         3872818bb956e3b1e3847f3ddbb467b181e6a864
+ )
+ FetchContent_MakeAvailable(fetch_volk)
+
+ message(STATUS "Downloaded volk")
+
 FetchContent_Declare(
   glm
   GIT_REPOSITORY https://github.com/g-truc/glm
@@ -36,7 +46,8 @@ SET(imgui_sources
     ../ext/imgui/imgui_draw.cpp 
     ../ext/imgui/imgui_demo.cpp 
     ../ext/imgui/imgui_widgets.cpp 
-    ../ext/imgui/imgui_tables.cpp)
+    ../ext/imgui/imgui_tables.cpp
+)
 
 if(NOT ANDROID)
     set(imgui_sources ${imgui_sources} ../ext/imgui/backends/imgui_impl_glfw.cpp)
@@ -44,47 +55,57 @@ else()
     set(imgui_sources ${imgui_sources} ../ext/imgui/backends/imgui_impl_android.cpp)
 endif()
 
-if(NOT ANDROID)
+if(NOT ANDOIRD)
     add_executable(vuk_all_examples)
-    target_include_directories(vuk_all_examples SYSTEM PRIVATE ../ext/stb ../ext/imgui)
-    target_sources(vuk_all_examples PRIVATE 
-        example_runner.cpp 
-        example_browser.cpp 
-        example_runner_glfw.cpp 
-        imgui.cpp 
-        stbi.cpp 
-        ${imgui_sources})
-
-    target_compile_definitions(vuk_all_examples PRIVATE GLM_FORCE_SIZE_FUNC GLM_FORCE_EXPLICIT_CTOR GLM_ENABLE_EXPERIMENTAL GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZERO_TO_ONE)
-    target_link_libraries(vuk_all_examples PRIVATE vuk)
-    target_link_libraries(vuk_all_examples PRIVATE vk-bootstrap glfw glm)
-    set_target_properties(vuk_all_examples
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-    )
-    if(VUK_COMPILER_CLANGPP OR VUK_COMPILER_GPP)
-        target_compile_options(vuk_all_examples PRIVATE -std=c++20 -fno-char8_t)
-    elseif(MSVC)
-        target_compile_options(vuk_all_examples PRIVATE /std:c++latest /permissive- /Zc:char8_t-)
-    endif()
 else()
     add_library(vuk_all_examples SHARED)
-    target_include_directories(vuk_all_examples SYSTEM PRIVATE ../ext/stb ../ext/imgui)
-    target_sources(vuk_all_examples PRIVATE 
-        example_runner.cpp 
-        example_browser.cpp 
-        imgui.cpp 
-        stbi.cpp 
-        ${imgui_sources})
+endif()
 
-    target_compile_definitions(vuk_all_examples PRIVATE GLM_FORCE_SIZE_FUNC GLM_FORCE_EXPLICIT_CTOR GLM_ENABLE_EXPERIMENTAL GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZERO_TO_ONE)
-    target_link_libraries(vuk_all_examples PRIVATE vuk)
-    target_link_libraries(vuk_all_examples PRIVATE vk-bootstrap glm)
-    set_target_properties(vuk_all_examples
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-    )
+target_include_directories(vuk_all_examples SYSTEM PRIVATE ../ext/stb ../ext/imgui)
+target_sources(vuk_all_examples PRIVATE 
+    example_runner.cpp 
+    example_browser.cpp 
+    volk_implementation.cpp
+    imgui.cpp 
+    stbi.cpp 
+    ${imgui_sources}
+)
+
+target_compile_definitions(vuk_all_examples PRIVATE 
+    GLM_FORCE_SIZE_FUNC 
+    GLM_FORCE_EXPLICIT_CTOR 
+    GLM_ENABLE_EXPERIMENTAL 
+    GLM_FORCE_RADIANS 
+    GLM_FORCE_DEPTH_ZERO_TO_ONE
+    VK_NO_PROTOTYPES 
+)
+    
+target_compile_definitions(vuk PUBLIC VUK_CUSTOM_VULKAN_HEADER=<volk.h>)
+cmake_policy(SET CMP0079 NEW)
+
+target_link_libraries(vuk_all_examples PRIVATE vuk)
+target_link_libraries(vuk_all_examples PRIVATE vk-bootstrap glfw glm volk_headers)
+set_target_properties(vuk_all_examples
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
+if(VUK_COMPILER_CLANGPP OR VUK_COMPILER_GPP)
     target_compile_options(vuk_all_examples PRIVATE -std=c++20 -fno-char8_t)
+elseif(MSVC)
+    target_compile_options(vuk_all_examples PRIVATE /std:c++latest /permissive- /Zc:char8_t-)
+endif()
+
+if(ANDROID)
+    # Integrate GameActivity, refer to
+    #     https://d.android.com/games/agdk/integrate-game-activity
+    # for the detailed instructions.
+    find_package(game-activity REQUIRED CONFIG)
+
+    target_link_libraries(vuk_all_examples PRIVATE
+        game-activity::game-activity
+        log
+        android
+    )
 endif()
 
 function(ADD_EXAMPLE name)
@@ -97,13 +118,21 @@ function(ADD_EXAMPLE name)
             "${name}.cpp" 
             example_runner.cpp 
             example_runner_single.cpp 
-            example_runner_glfw.cpp 
+            volk_implementation.cpp
             imgui.cpp 
             stbi.cpp 
-            ${imgui_sources})
+            ${imgui_sources}
+        )
         
-            target_include_directories(${FULL_NAME} SYSTEM PRIVATE ../ext/stb ../ext/imgui)
-        target_compile_definitions(${FULL_NAME} PRIVATE GLM_FORCE_SIZE_FUNC GLM_FORCE_EXPLICIT_CTOR GLM_ENABLE_EXPERIMENTAL GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZERO_TO_ONE)
+        target_include_directories(${FULL_NAME} SYSTEM PRIVATE ../ext/stb ../ext/imgui)
+        target_compile_definitions(${FULL_NAME} PRIVATE 
+            GLM_FORCE_SIZE_FUNC 
+            GLM_FORCE_EXPLICIT_CTOR 
+            GLM_ENABLE_EXPERIMENTAL 
+            GLM_FORCE_RADIANS 
+            GLM_FORCE_DEPTH_ZERO_TO_ONE 
+            VK_NO_PROTOTYPES
+        )
         target_link_libraries(${FULL_NAME} PRIVATE vuk)
         target_link_libraries(${FULL_NAME} PRIVATE vk-bootstrap glfw glm)
         set_target_properties(${FULL_NAME}

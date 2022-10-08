@@ -1,5 +1,3 @@
-#pragma once
-
 #ifdef __ANDROID__
 #error "GLFW runner is not supported on Android"
 #endif

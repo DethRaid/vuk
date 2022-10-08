@@ -1,5 +1,12 @@
 #include "example_runner.hpp"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#include <game-activity/native_app_glue/android_native_app_glue.h>
+
+#include "example_runner_android.hpp"
+#endif
+
 void vuk::ExampleRunner::render() {
 	Compiler compiler;
 	vuk::wait_for_futures_explicit(*global, compiler, futures);
@@ -27,8 +34,26 @@ void vuk::ExampleRunner::render() {
 	}
 }
 
+#ifdef __ANDROID__
+void android_main(struct android_app* app) {
+	// Set the callback to process system events
+	app->onAppCmd = nullptr;
+
+	vuk::ExampleRunnerAndroid::app = app;
+
+	// Used to poll the events in the main loop
+	int events;
+	android_poll_source* source;
+
+	vuk::ExampleRunner::get_runner().setup();
+	vuk::ExampleRunner::get_runner().render();
+	vuk::ExampleRunner::get_runner().cleanup();
+}
+
+#else
 int main() {
 	vuk::ExampleRunner::get_runner().setup();
 	vuk::ExampleRunner::get_runner().render();
 	vuk::ExampleRunner::get_runner().cleanup();
 }
+#endif
