@@ -295,9 +295,7 @@ namespace vuk {
 			info.pObjectName = devmem_name.c_str();
 			info.objectType = VK_OBJECT_TYPE_DEVICE_MEMORY;
 			info.objectHandle = reinterpret_cast<uint64_t>(memory);
-            if(pags.setDebugUtilsObjectNameEXT) {
-                pags.setDebugUtilsObjectNameEXT(pags.device, &info);
-            }
+			vkSetDebugUtilsObjectNameEXT(pags.device, &info);
 		}
 		{
 			VkDebugUtilsObjectNameInfoEXT info;
@@ -306,9 +304,7 @@ namespace vuk {
 			info.pObjectName = buffer_name.c_str();
 			info.objectType = VK_OBJECT_TYPE_BUFFER;
 			info.objectHandle = reinterpret_cast<uint64_t>((VkBuffer)buffer);
-            if(pags.setDebugUtilsObjectNameEXT) {
-                pags.setDebugUtilsObjectNameEXT(pags.device, &info);
-            }
+			vkSetDebugUtilsObjectNameEXT(pags.device, &info);
 		}
 	}
 
@@ -322,9 +318,7 @@ namespace vuk {
 			info.pObjectName = devmem_name.c_str();
 			info.objectType = VK_OBJECT_TYPE_DEVICE_MEMORY;
 			info.objectHandle = reinterpret_cast<uint64_t>(memory);
-            if(pags.setDebugUtilsObjectNameEXT) {
-                pags.setDebugUtilsObjectNameEXT(pags.device, &info);
-            }
+			vkSetDebugUtilsObjectNameEXT(pags.device, &info);
 		}
 	}
 
