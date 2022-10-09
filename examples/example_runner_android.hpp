@@ -11,42 +11,17 @@
 
 namespace vuk {
 	struct ExampleRunnerAndroid : ExampleRunner {
-		static android_app* app;
+		static inline android_app* app;
 
-		ExampleRunnerAndroid() {
-			create_instance();
+		ExampleRunnerAndroid();
 
-			surface = vkbdevice.surface;
+		void setup_platform() override;
 
-			create_device();
+		void set_window_title(std::string title) override;
 
-			create_vuk();
-		}
+		double get_time() override;
 
-		void setup_platform() override {
-			ImGui_ImplAndroid_Init(app->window);
-		}
-
-		void set_window_title(std::string title) override {}
-
-		double get_time() override {
-			return static_cast<double>(clock()) / CLOCKS_PER_SEC;
-		}
-
-		void poll_events() override {
-			should_close = app->destroyRequested != 0;
-
-			int events;
-			android_poll_source* source;
-
-			if (ALooper_pollAll(1, nullptr, &events, (void**)&source) >= 0) {
-				if (source != nullptr) {
-					source->process(app, source);
-				}
-			}
-
-			ImGui_ImplAndroid_NewFrame();
-		}
+		void poll_events() override;
 
 		~ExampleRunnerAndroid() = default;
 	};

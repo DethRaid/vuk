@@ -8,7 +8,7 @@ endif()
 FetchContent_Declare(
   vk-bootstrap 
   GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap
-  GIT_TAG        cf8df11a0a071463009031cb474099dacffe90ed
+  GIT_TAG        01de71738cd206eefe2537882888dc741881ec0b
 )
 FetchContent_MakeAvailable(vk-bootstrap)
 
@@ -50,16 +50,19 @@ SET(imgui_sources
 )
 
 if(NOT ANDROID)
-    set(imgui_sources ${imgui_sources} ../ext/imgui/backends/imgui_impl_glfw.cpp)
+    set(platform_sources
+            ../ext/imgui/backends/imgui_impl_glfw.cpp
+            )
 else()
-    set(imgui_sources ${imgui_sources} ../ext/imgui/backends/imgui_impl_android.cpp)
+    set(platform_sources
+            ../ext/imgui/backends/imgui_impl_android.cpp
+            android_game_activity_source.cpp
+            example_runner_android.cpp
+            )
 endif()
 
-if(NOT ANDOIRD)
-    add_executable(vuk_all_examples)
-else()
-    add_library(vuk_all_examples SHARED)
-endif()
+add_library(vuk_all_examples SHARED)
+# add_executable(vuk_all_examples)
 
 target_include_directories(vuk_all_examples SYSTEM PRIVATE ../ext/stb ../ext/imgui)
 target_sources(vuk_all_examples PRIVATE 
@@ -69,6 +72,7 @@ target_sources(vuk_all_examples PRIVATE
     imgui.cpp 
     stbi.cpp 
     ${imgui_sources}
+    ${platform_sources}
 )
 
 target_compile_definitions(vuk_all_examples PRIVATE 
@@ -82,9 +86,10 @@ target_compile_definitions(vuk_all_examples PRIVATE
     
 target_compile_definitions(vuk PUBLIC VUK_CUSTOM_VULKAN_HEADER=<volk.h>)
 cmake_policy(SET CMP0079 NEW)
+target_link_libraries(vuk PUBLIC volk_headers)
 
 target_link_libraries(vuk_all_examples PRIVATE vuk)
-target_link_libraries(vuk_all_examples PRIVATE vk-bootstrap glfw glm volk_headers)
+target_link_libraries(vuk_all_examples PRIVATE vk-bootstrap glm volk_headers)
 set_target_properties(vuk_all_examples
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -95,11 +100,16 @@ elseif(MSVC)
     target_compile_options(vuk_all_examples PRIVATE /std:c++latest /permissive- /Zc:char8_t-)
 endif()
 
-if(ANDROID)
+if(NOT ANDROID) 
+    target_link_libraries(vuk_all_examples PRIVATE glfw)
+elseif(ANDROID)
     # Integrate GameActivity, refer to
     #     https://d.android.com/games/agdk/integrate-game-activity
     # for the detailed instructions.
     find_package(game-activity REQUIRED CONFIG)
+
+    target_compile_definitions(vuk_all_examples PRIVATE VK_USE_PLATFORM_ANDROID_KHR)
+    target_compile_definitions(vuk PRIVATE VK_USE_PLATFORM_ANDROID_KHR)
 
     target_link_libraries(vuk_all_examples PRIVATE
         game-activity::game-activity
@@ -158,6 +168,9 @@ ADD_EXAMPLE(08_pipelined_compute)
 ADD_EXAMPLE(09_persistent_descriptorset)
 ADD_EXAMPLE(10_baby_renderer)
 ADD_EXAMPLE(11_composition)
-ADD_EXAMPLE(12_rt_pipeline)
+
+if(NOT ANDROID)
+    ADD_EXAMPLE(12_rt_pipeline)
+endif()
 
 message(STATUS " Added examples")

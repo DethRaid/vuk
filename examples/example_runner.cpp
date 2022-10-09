@@ -1,5 +1,7 @@
 #include "example_runner.hpp"
 
+#include <iostream>
+
 #ifdef __ANDROID__
 #include "example_runner_android.hpp"
 #else
@@ -60,8 +62,13 @@ namespace vuk {
 	}
 
 	void ExampleRunner::create_instance() {
+		const auto vuk_result = volkInitialize();
+		if (vuk_result != VK_SUCCESS) {
+			throw std::runtime_error{ "Could not initialize Volk" };
+		}
+
 		vkb::InstanceBuilder builder;
-		builder.request_validation_layers()
+		builder.enable_validation_layers()
 		    .set_debug_callback([](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		                           VkDebugUtilsMessageTypeFlagsEXT messageType,
 		                           const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
@@ -73,16 +80,23 @@ namespace vuk {
 		    })
 		    .set_app_name("vuk_example")
 		    .set_engine_name("vuk")
-		    .require_api_version(1, 2, 0)
-		    .set_app_version(0, 1, 0);
+		    .require_api_version(1, 1, 0)
+		    .set_app_version(0, 1, 0)
+#ifdef __ANDROID__
+			.enable_layer("VK_LAYER_KHRONOS_synchronization2")
+			.enable_layer("VK_LAYER_KHRONOS_timeline_semaphore")
+#endif
+			;
 		auto inst_ret = builder.build();
 		if (!inst_ret) {
-			throw std::runtime_error("Couldn't initialise instance");
+			throw std::runtime_error(inst_ret.error().message());
 		}
 
 		has_rt = true;
 
 		vkbinstance = inst_ret.value();
+
+		volkLoadInstance(vkbinstance.instance);
 	}
 
 	void ExampleRunner::create_device() {
@@ -101,7 +115,7 @@ namespace vuk {
 			selector2.set_surface(surface).set_minimum_version(1, 0).add_required_extension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 			auto phys_ret2 = selector2.select();
 			if (!phys_ret2) {
-				throw std::runtime_error("Couldn't create physical device");
+				throw std::runtime_error(phys_ret2.error().message());
 			} else {
 				vkbphysical_device = phys_ret2.value();
 			}
@@ -127,19 +141,21 @@ namespace vuk {
 		vk10features.features.shaderInt64 = true;
 		VkPhysicalDeviceSynchronization2FeaturesKHR sync_feat{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR,
 			                                                     .synchronization2 = true };
+		device_builder = device_builder.add_pNext(&vk12features).add_pNext(&vk11features).add_pNext(&sync_feat).add_pNext(&vk10features);
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR accelFeature{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
 			                                                             .accelerationStructure = true };
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtPipelineFeature{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
 			                                                               .rayTracingPipeline = true };
-		device_builder = device_builder.add_pNext(&vk12features).add_pNext(&vk11features).add_pNext(&sync_feat).add_pNext(&accelFeature).add_pNext(&vk10features);
 		if (has_rt) {
-			device_builder = device_builder.add_pNext(&rtPipelineFeature);
+			device_builder = device_builder.add_pNext(&rtPipelineFeature).add_pNext(&accelFeature);
 		}
 		auto dev_ret = device_builder.build();
 		if (!dev_ret) {
-			throw std::runtime_error("Couldn't create device");
+			throw std::runtime_error(dev_ret.error().message());
 		}
 		vkbdevice = dev_ret.value();
+
+		volkLoadDevice(vkbdevice.device);
 	}
 
 	void ExampleRunner::create_vuk() {
