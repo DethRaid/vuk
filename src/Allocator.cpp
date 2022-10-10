@@ -282,7 +282,7 @@ namespace vuk {
 		vkBindBufferMemory(pags.device, buffer, memory, 0);
 		pags.result = buffer;
 		VkBufferDeviceAddressInfo bdai{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO, nullptr, buffer };
-		pags.device_address = vkGetBufferDeviceAddress(pags.device, &bdai);
+		pags.device_address = vkGetBufferDeviceAddressKHR(pags.device, &bdai);
 		std::string devmem_name = "DeviceMemory (Pool [" + std::to_string(memoryType) + "] " + to_human_readable(size) + ")";
 		std::string buffer_name = "Buffer (Pool ";
 		buffer_name += to_string(vuk::BufferUsageFlags(pags.bci.usage));
@@ -460,7 +460,7 @@ namespace vuk {
 			auto result = vmaCreateBuffer(allocator, &bci, &vaci, &vkbuffer, &res, &vai);
 			assert(result == VK_SUCCESS);
 			VkBufferDeviceAddressInfo bdai{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO, nullptr, vkbuffer };
-			auto bda = vkGetBufferDeviceAddress(device, &bdai);
+			auto bda = vkGetBufferDeviceAddressKHR(device, &bdai);
 			std::byte* mapped_ptr = (std::byte*)vai.pMappedData;
 			for (auto i = 0; i < num_blocks; i++) {
 				pool.used_allocations[pool.used_allocation_count + i] = { res, vai.deviceMemory,      vai.offset + i * pool.block_size, vkbuffer, mapped_ptr,
@@ -607,7 +607,7 @@ namespace vuk {
 			vkCreateBuffer(device, &bci, nullptr, &b.buffer);
 			vkBindBufferMemory(device, b.buffer, vai.deviceMemory, vai.offset);
 			VkBufferDeviceAddressInfo bdai{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO, nullptr, b.buffer };
-			uint64_t device_address = vkGetBufferDeviceAddress(device, &bdai);
+			uint64_t device_address = vkGetBufferDeviceAddressKHR(device, &bdai);
 			buffers.emplace(reinterpret_cast<uint64_t>(vai.deviceMemory), std::tuple(b.buffer, bci.size, device_address));
 			b.offset = 0;
 			b.size = bci.size;

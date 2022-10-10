@@ -102,10 +102,6 @@ namespace vuk {
 
 		struct DebugUtils {
 			VkDevice device;
-			PFN_vkSetDebugUtilsObjectNameEXT setDebugUtilsObjectNameEXT;
-			PFN_vkCmdBeginDebugUtilsLabelEXT cmdBeginDebugUtilsLabelEXT;
-			PFN_vkCmdEndDebugUtilsLabelEXT cmdEndDebugUtilsLabelEXT;
-
 			bool enabled() const;
 
 			DebugUtils(Context& ctx);
@@ -276,7 +272,7 @@ namespace vuk {
 			info.objectType = VK_OBJECT_TYPE_PIPELINE;
 		}
 		info.objectHandle = reinterpret_cast<uint64_t>(t);
-		setDebugUtilsObjectNameEXT(device, &info);
+		vkSetDebugUtilsObjectNameEXT(device, &info);
 	}
 } // namespace vuk
 

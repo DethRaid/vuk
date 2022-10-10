@@ -166,13 +166,10 @@ namespace vuk {
 	}
 
 	bool Context::DebugUtils::enabled() const {
-		return setDebugUtilsObjectNameEXT != nullptr;
+		return vkSetDebugUtilsObjectNameEXT != nullptr;
 	}
 
 	Context::DebugUtils::DebugUtils(Context& ctx) : device(ctx.device) {
-		setDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetDeviceProcAddr(ctx.device, "vkSetDebugUtilsObjectNameEXT");
-		cmdBeginDebugUtilsLabelEXT = (PFN_vkCmdBeginDebugUtilsLabelEXT)vkGetDeviceProcAddr(ctx.device, "vkCmdBeginDebugUtilsLabelEXT");
-		cmdEndDebugUtilsLabelEXT = (PFN_vkCmdEndDebugUtilsLabelEXT)vkGetDeviceProcAddr(ctx.device, "vkCmdEndDebugUtilsLabelEXT");
 	}
 
 	void Context::DebugUtils::set_name(const Texture& tex, Name name) {
@@ -188,13 +185,13 @@ namespace vuk {
 		VkDebugUtilsLabelEXT label = { .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT };
 		label.pLabelName = name.c_str();
 		::memcpy(label.color, color.data(), sizeof(float) * 4);
-		cmdBeginDebugUtilsLabelEXT(cb, &label);
+		vkCmdBeginDebugUtilsLabelEXT(cb, &label);
 	}
 
 	void Context::DebugUtils::end_region(const VkCommandBuffer& cb) {
 		if (!enabled())
 			return;
-		cmdEndDebugUtilsLabelEXT(cb);
+		vkCmdEndDebugUtilsLabelEXT(cb);
 	}
 
 	Result<void> Context::submit_graphics(std::span<VkSubmitInfo> sis, VkFence fence) {

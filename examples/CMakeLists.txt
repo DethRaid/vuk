@@ -61,8 +61,8 @@ else()
             )
 endif()
 
-add_library(vuk_all_examples SHARED)
-# add_executable(vuk_all_examples)
+# add_library(vuk_all_examples SHARED)
+add_executable(vuk_all_examples)
 
 target_include_directories(vuk_all_examples SYSTEM PRIVATE ../ext/stb ../ext/imgui)
 target_sources(vuk_all_examples PRIVATE 
